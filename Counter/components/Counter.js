@@ -21,20 +21,21 @@ class Counter extends Component {
     const { value, onIncrement, onDecrement } = this.props;
     return (
       <p>
-      Clicked: {value} times
-    <button onClick={onIncrement}>
-      +
-      </button>
-      <button onClick={onDecrement}>
-      -
-      </button>
-        {/** this.IncrementIfOdd is A bound proxied method */}
-      <button onClick={this.incrementIfOdd}>Increment if odd</button>
-    <button onClick={this.incrementAsync}>Increment async</button>
-    </p>
-  )
+        Clicked: {value} times
+        <button onClick={onIncrement}>
+          +
+        </button>
+        <button onClick={onDecrement}>
+          -
+        </button>
+
+        <button onClick={this.incrementIfOdd}>Increment if odd</button>
+        <button onClick={this.incrementAsync}>Increment async</button>
+      </p>
+    )
   }
 }
+
 
 Counter.propTypes = {
   value: PropTypes.number.isRequired,
