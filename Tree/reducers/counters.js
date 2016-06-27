@@ -1,15 +1,29 @@
 export default function counters(state = [], action) {
+
+  // let rootChildren = rootNode.children;
+
   if (action.type == "ADD_COUNTER") {
-    return [
-      ...state,
+    let rootNode = state[0];
+    let rootChildren = rootNode.children;
+
+    return ([
       {
-        id: action.id,
-        count: 0,
-        subcounters: []
+        id: rootNode.id,
+        count: rootNode.count,
+        children: [
+          ...rootChildren,
+          {
+            id: action.id,
+            count: 0,
+            children: []
+          }
+        ]
       }
-    ]
+    ]);
+
+
   } else if (action.type == "REMOVE_COUNTER") {
-    return state.map(function(item) {
+    return state.map(function (item) {
       if (item.id != action.id) {
         return item;
       }

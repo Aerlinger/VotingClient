@@ -6,23 +6,23 @@ import AddCounter from '../components/AddCounter'
 import {incrementCounter, decrementCounter, addCounter} from '../actions'
 
 const mapStateToProps = (state, ownProps) => {
-  console.log(`Current state: ${state}`);
   let thisNode = state.counters[0];
 
   return ({
-    id: thisNode.id,
+    id: 0,
     count: thisNode.count,
     children: thisNode.children.map(
       function (child) {
-        return {
-          id: child.id,
-          count: child.count,
-          children: child.children
-        };
+        return (
+          <div>
+            <pre>id: {child.id}</pre>
+            <pre>cnt: {child.count}</pre>
+            <pre>chldren: {child.children}</pre>
+          </div>
+        )
       }
     )
   });
-
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
@@ -40,8 +40,6 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 }
 
 class RootComponent extends React.Component {
-  // ({id, count, counters, onIncrementClick, onDecrementClick, onAddCounterClick}) => {
-  //   let removeLink = null
 
   static get defaultProps() {
     return {
