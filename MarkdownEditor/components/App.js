@@ -3,6 +3,7 @@ import React from 'react'
 
 import brace from 'brace';
 import Editor from './Editor';
+import MarkdownFrame from './MarkdownFrame';
 import Markdown from 'markdown-it/dist/markdown-it.js'
 import MDReactComponent from 'markdown-react-js'
 
@@ -16,14 +17,19 @@ function onChange(newValue) {
 }
 
 export default class App extends React.Component {
+
   render() {
     return (
       <div>
-        <Editor
-          onChange={ (text) => console.log(text) }
-        />
+        <div style={{float: "left", width: "50%"}}>
+          <Editor
+            text={this.props.text}
+          />
+        </div>
 
-        <MDReactComponent text="Some text with **emphasis!**"/>
+        <div style={{float: "left", width: "50%"}}>
+          <MarkdownFrame />
+        </div>
       </div>
     )
   }

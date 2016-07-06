@@ -7,6 +7,7 @@ import { updateText } from '../actions'
 
 
 const mapStateToProps = (state, ownProps) => ({
+  value: state.editor.text
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
@@ -32,6 +33,8 @@ class EditorComponent extends React.Component {
         theme="github"
         name="ace-editor"
         onChange={this.props.onChange}
+        
+        value={this.props.value}
         editorProps={{$blockScrolling: true}}
       />
     )
