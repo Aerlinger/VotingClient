@@ -16,8 +16,8 @@ let store = createStore(CountersApp, {
         children: []
       }
     ]
-  },
-  window.devToolsExtension ? window.devToolsExtension() : DevTools.instrument()
+  }
+  // window.devToolsExtension ? window.devToolsExtension() : DevTools.instrument()
 );
 let rootNode = window.document.getElementById("root")
 
