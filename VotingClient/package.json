@@ -32,6 +32,9 @@
   "dependencies": {
     "immutable": "^3.8.1",
     "react": "^15.2.0",
-    "react-dom": "^15.2.0"
+    "react-addons-pure-render-mixin": "^15.2.0",
+    "react-addons-test-utils": "^15.2.0",
+    "react-dom": "^15.2.0",
+    "react-router": "^2.0.0"
   }
 }
