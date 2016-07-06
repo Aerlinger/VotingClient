@@ -10,7 +10,7 @@ const store = createStore(
   AppReducers,
   {
     editor: {
-      text: "// Replace me"
+      text: "### Replace me"
     }
   },
   window.devToolsExtension ? window.devToolsExtension() : f => f
