@@ -6,3 +6,17 @@
 *This has a similar simplifying effect as using pure functions does: We can figure out what a component does by looking at what it receives as inputs and what it renders. There's nothing else we need to know about the component. We can also test it really easily - almost as easily as we were able to test our pure application logic.*
 
 *If components can't have state, where will the state be? In an immutable data structure inside a Redux store! We've already seen how that works. The big idea is to separate the state from the user interface code. The React components are just a stateless projection of the state at a given point in time.*
+
+
+### Redux:
+
+**Two responsibilities:**
+
+1. Map Store state into input component props
+2. Mapping actions into component output callback props
+
+### Routing:
+- The root component App doesn't really need anything since it doesn't use any data.
+- `Vote` and `Winner` are only used by parent components that give them all the props they need. They don't need wiring up either.
+- What's left are the components we use in routes: `Voting` and `Results`. They are currently getting data in as hardcoded placeholder props from `App`. These are the components that need to be wired up to the Store.
+
