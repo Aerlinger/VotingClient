@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash'),
-  log = require('../../services/log').asInternal(__filename);
+  log = require('../services/log').asInternal(__filename);
 let outputMap = {};
 
 /**

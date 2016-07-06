@@ -3,10 +3,10 @@
 const _ = require('lodash'),
   bluebird = require('bluebird'),
   client = require('./client'),
-  log = require('../../services/log').asInternal(__filename),
-  processes = require('../../services/processes'),
+  log = require('../services/log').asInternal(__filename),
+  processes = require('../services/processes'),
   os = require('os'),
-  rules = require('../../services/rules');
+  rules = require('../services/rules');
 
 /**
  * @type {[{when: *, then: *}]}

@@ -1,10 +1,10 @@
 'use strict';
 
-const util = require('util'),
-  winston = require('winston');
+const util    = require('util');
+const winston = require('winston');
 
-let ElectronLogger = function (options) {
-  this.name = 'electronLogger';
+let ElectronLogger = function(options) {
+  this.name  = 'electronLogger';
   this.level = options.level || 'info';
 };
 
@@ -14,12 +14,13 @@ let ElectronLogger = function (options) {
 //
 util.inherits(ElectronLogger, winston.Transport);
 
-ElectronLogger.prototype.log = function (level, msg, meta, callback) {
-  const ipcRenderer = require('electron').ipcRenderer;
+ElectronLogger.prototype.log = function(level, msg, meta, callback) {
+  // const ipcRenderer = require('electron').ipcRenderer;
+  winston.log(level, msg);
 
-  if (ipcRenderer) {
-    ipcRenderer.send('console-log', {level, msg, meta});
-  }
+  // if (ipcRenderer) {
+  //   ipcRenderer.send('console-log', { level, msg, meta });
+  // }
 
   //
   // Store this message and metadata, maybe use some custom logic

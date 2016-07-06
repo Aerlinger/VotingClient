@@ -1,62 +1,41 @@
-'use strict';
+const _              = require('lodash'),
+      bluebird       = require('bluebird'),
+      clientResponse = require('./client-response'),
+      EventEmitter   = require('events'),
+      StreamSplitter = require('stream-splitter'),
+      log            = require('../services/log').asInternal(__filename),
+      path           = require('path'),
+      processes      = require('../services/processes'),
+      promises       = require('../services/promises'),
+      pythonLanguage = require('./language'),
+      uuid           = require('uuid');
+
 
 /**
- * @module
- * @see http://ipython.org/ipython-doc/stable/api/generated/IPython.kernel.client.html#IPython.kernel.client.KernelClient
- * @see http://jupyter-client.readthedocs.org/en/latest/messaging.html
+ * Listen to JSON stream, emitting once a parseable JSON object has been received
+ *
+ * @param stream
+ * @returns {EventEmitter}
  */
-
-/**
- * @typedef {object} ZeroMQMessage
- * @property content
- * @property [content.execution_state]
- * @property header
- * @property footer
- */
-
-/**
- * @typedef {object} JupyterClientResponse
- * @property {string} id
- * @property {ZeroMQMessage|string} result  Can be an id for a later response, or it can be an actual response.
- * @property {'stdin'|'iopub'|'shell'} source
- */
-
-const _ = require('lodash'),
-  bluebird = require('bluebird'),
-  clientResponse = require('./client-response'),
-  EventEmitter = require('events'),
-  StreamSplitter = require('stream-splitter'),
-  log = require('../../services/log').asInternal(__filename),
-  path = require('path'),
-  processes = require('../../services/processes'),
-  promises = require('../../services/promises'),
-  pythonLanguage = require('./language'),
-  uuid = require('uuid');
-
-/**
- * The default environment variables that all clients will assume
- * @type object
- */
-let defaultEnv = process.env;
-
 function createObjectEmitter(stream) {
-  const streamSplitter = new StreamSplitter('\n'),
-    emitter = new EventEmitter();
+  const streamSplitter = new StreamSplitter('\n');
+  const emitter        = new EventEmitter();
 
-  stream = stream.pipe(streamSplitter);
+  stream          = stream.pipe(streamSplitter);
   stream.encoding = 'utf8';
-  stream.on('token', function (token) {
+  stream.on('token', function(token) {
     let obj;
 
     try {
-      obj = JSON.parse(token);
+      obj = JSON.parse(token);  // FIXME: Performance issues here?
       emitter.emit('data', obj);
-    } catch (ex) {
+    } catch(ex) {
       log('error', require('util').inspect(token), ex);
       // we don't have enough data yet, maybe?
     }
   });
-  stream.on('error', error => emitter.emit('error', error) );
+
+  stream.on('error', error => emitter.emit('error', error));
 
   return emitter;
 }
@@ -68,8 +47,10 @@ function createObjectEmitter(stream) {
  */
 function handleProcessStreamEvent(client, source, data) {
   log('info', 'client event', source, data);
+  
   client.emit('event', source, data);
 }
+
 
 /**
  * @param {JupyterClient} client
@@ -90,26 +71,6 @@ function listenToChild(client, child) {
 }
 
 /**
- * Write object to script.
- * @param {ChildProcess} childProcess
- * @param {object} obj
- * @returns {Promise}
- */
-function write(childProcess, obj) {
-  return new bluebird(function (resolve, reject) {
-    let result = childProcess.stdin.write(JSON.stringify(obj) + '\n', function (error) {
-      if (!result) {
-        reject(new Error('Unable to write to stdin'));
-      } else if (error) {
-        reject(error);
-      } else {
-        resolve();
-      }
-    });
-  });
-}
-
-/**
  * @param {JupyterClient} client
  * @param {object} invocation
  * @param {string} invocation.method
@@ -121,20 +82,20 @@ function write(childProcess, obj) {
  * @returns {Promise}
  */
 function request(client, invocation, options) {
-  const childProcess = client.childProcess,
-    requestMap = client.requestMap,
-    id = uuid.v4().toString(),
-    inputPromise = write(childProcess, _.assign({id}, invocation)),
-    successEvent = options.successEvent,
-    hidden = options.hidden,
-    startTime = new Date().getTime(),
-    outputPromise = new Promise(function (resolve, reject) {
-      requestMap[id] = {id, invocation, successEvent, hidden, deferred: {resolve, reject}};
-    });
+  const childProcess  = client.childProcess,
+        requestMap    = client.requestMap,
+        id            = uuid.v4().toString(),
+        inputPromise  = write(childProcess, _.assign({ id }, invocation)),
+        successEvent  = options.successEvent,
+        hidden        = options.hidden,
+        startTime     = new Date().getTime(),
+        outputPromise = new Promise(function(resolve, reject) {
+          requestMap[id] = { id, invocation, successEvent, hidden, deferred: { resolve, reject } };
+        });
 
   return inputPromise
     .then(() => outputPromise)
-    .finally(function () {
+    .finally(function() {
       const endTime = (new Date().getTime() - startTime) + 'ms';
 
       log('info', 'request', invocation, endTime);
@@ -151,7 +112,7 @@ class JupyterClient extends EventEmitter {
   constructor(child) {
     super();
     this.childProcess = child;
-    this.requestMap = {};
+    this.requestMap   = {};
 
     listenToChild(this, child);
   }
@@ -169,8 +130,8 @@ class JupyterClient extends EventEmitter {
   execute(code, args) {
     return request(this, {
       method: 'execute',
-      kwargs: _.assign({code}, pythonLanguage.toPythonArgs(args))
-    }, {successEvent: 'execute_reply'});
+      kwargs: _.assign({ code }, pythonLanguage.toPythonArgs(args))
+    }, { successEvent: 'execute_reply' });
   }
 
   /**
@@ -179,15 +140,15 @@ class JupyterClient extends EventEmitter {
    * @returns {Promise}
    */
   input(str) {
-    return request(this, {method: 'input', args: [str]}, {successEvent: 'execute_reply'});
+    return request(this, { method: 'input', args: [str] }, { successEvent: 'execute_reply' });
   }
 
   interrupt() {
-    const id = uuid.v4().toString(),
-      target = 'manager',
-      method = 'interrupt_kernel';
+    const id     = uuid.v4().toString(),
+          target = 'manager',
+          method = 'interrupt_kernel';
 
-    return write(this.childProcess, {method, target, id});
+    return write(this.childProcess, { method, target, id });
   }
 
   /**
@@ -203,10 +164,10 @@ class JupyterClient extends EventEmitter {
   getResult(code, args) {
     return request(this, {
       method: 'execute',
-      kwargs: _.assign({code}, pythonLanguage.toPythonArgs(args))
+      kwargs: _.assign({ code }, pythonLanguage.toPythonArgs(args))
     }, {
       successEvent: ['execute_result', 'display_data', 'stream'],
-      emitOnly: []
+      emitOnly:     []
     });
   }
 
@@ -217,39 +178,39 @@ class JupyterClient extends EventEmitter {
   getEval(str) {
     return request(this, {
       exec_eval: str
-    }, {successEvent: ['eval_results']});
+    }, { successEvent: ['eval_results'] });
   }
 
   getDocStrings(names) {
     const code = '__get_docstrings(globals(), ' + JSON.stringify(names) + ', False)',
-      args = {
-        allowStdin: false,
-        stopOnError: true
-      };
+          args = {
+            allowStdin:  false,
+            stopOnError: true
+          };
 
     return request(this, {
       method: 'execute',
-      kwargs: _.assign({code}, pythonLanguage.toPythonArgs(args))
+      kwargs: _.assign({ code }, pythonLanguage.toPythonArgs(args))
     }, {
       successEvent: ['stream'],
-      hidden: true
+      hidden:       true
     });
   }
 
   getVariables() {
     const code = '__get_variables(globals())',
-      args = {
-        allowStdin: false,
-        stopOnError: true
-      };
+          args = {
+            allowStdin:  false,
+            stopOnError: true
+          };
 
     return request(this, {
       method: 'execute',
-      kwargs: _.assign({code}, pythonLanguage.toPythonArgs(args))
+      kwargs: _.assign({ code }, pythonLanguage.toPythonArgs(args))
     }, {
       successEvent: ['stream'],
-      hidden: true
-    }).then(function (result) {
+      hidden:       true
+    }).then(function(result) {
       return JSON.parse(result.text);
     });
   }
@@ -276,8 +237,8 @@ class JupyterClient extends EventEmitter {
   getAutoComplete(code, cursorPos) {
     return request(this, {
       method: 'complete', // sends complete_request
-      args: [code, cursorPos]
-    }, {successEvent: 'complete_reply'});
+      args:   [code, cursorPos]
+    }, { successEvent: 'complete_reply' });
   }
 
   /**
@@ -299,8 +260,8 @@ class JupyterClient extends EventEmitter {
 
     return request(this, {
       method: 'inspect', // sends inspect_request
-      args: [code, cursorPos, detailLevel]
-    }, {successEvent: 'inspect_reply'});
+      args:   [code, cursorPos, detailLevel]
+    }, { successEvent: 'inspect_reply' });
   }
 
   /**
@@ -318,8 +279,8 @@ class JupyterClient extends EventEmitter {
   isComplete(code) {
     return request(this, {
       method: 'is_complete', // sends is_complete_request
-      args: [code]
-    }, {successEvent: 'is_complete_reply'});
+      args:   [code]
+    }, { successEvent: 'is_complete_reply' });
   }
 
   /**
@@ -330,6 +291,7 @@ class JupyterClient extends EventEmitter {
   }
 }
 
+
 /**
  * @param {object} [options]
  * @returns {object}
@@ -338,8 +300,8 @@ function getPythonCommandOptions(options) {
   options = resolveHomeDirectory(options);
 
   return _.assign({
-    env: pythonLanguage.setDefaultEnvVars(defaultEnv),
-    stdio: ['pipe', 'pipe', 'pipe'],
+    env:      pythonLanguage.setDefaultEnvVars(process.env),
+    stdio:    ['pipe', 'pipe', 'pipe'],
     encoding: 'UTF8'
   }, _.pick(options || {}, ['shell']));
 }
@@ -355,7 +317,7 @@ function createPythonScriptProcess(targetFile, options) {
   options = _.pick(options || {}, ['shell', 'cmd']);
 
   const processOptions = getPythonCommandOptions(options),
-    cmd = options.cmd || 'python';
+        cmd            = options.cmd || 'python';
 
   return processes.create(cmd, [targetFile], processOptions);
 }
@@ -365,14 +327,14 @@ function createPythonScriptProcess(targetFile, options) {
  * @returns {Promise<JupyterClient>}
  */
 function create(options) {
-  const targetFile = path.resolve(path.join(__dirname, 'start_kernel.py'));
+  const targetFile = path.resolve('./bin/start_kernel.py');
 
-  return bluebird.try(function () {
-    const child = createPythonScriptProcess(targetFile, options),
-      client = new JupyterClient(child);
+  return bluebird.try(function() {
+    const child  = createPythonScriptProcess(targetFile, options),
+          client = new JupyterClient(child);
 
-    return promises.eventsToPromise(client, {resolve: 'ready', reject: 'error'})
-      .then(_.constant(client));
+    return promises.eventsToPromise(client, { resolve: 'ready', reject: 'error' })
+                   .then(_.constant(client));
   });
 }
 
@@ -384,7 +346,7 @@ function create(options) {
  */
 function getPythonScriptResults(targetFile, options) {
   const processOptions = getPythonCommandOptions(options),
-    cmd = options.cmd || 'python';
+        cmd            = options.cmd || 'python';
 
   return processes.exec(cmd, [targetFile], processOptions);
 }
@@ -394,14 +356,14 @@ function getPythonScriptResults(targetFile, options) {
  * @returns {Promise}
  */
 function checkPython(options) {
-  const targetFile = path.resolve(path.join(__dirname, 'check_python.py'));
+  const targetFile = path.resolve('./bin/check_python.py');
 
   return exports.getPythonScriptResults(targetFile, options)
-    .then(JSON.parse)
-    .then(function (pythonOptions) {
-      return _.assign({}, pythonOptions, options);
-    })
-    .timeout(10000, 'Unable to check python in under 10 seconds: ' + JSON.stringify(options));
+                .then(JSON.parse)
+                .then(function(pythonOptions) {
+                  return _.assign({}, pythonOptions, options);
+                })
+                .timeout(10000, 'Unable to check python in under 10 seconds: ' + JSON.stringify(options));
 }
 
 /**
@@ -418,9 +380,6 @@ function resolveHomeDirectory(options) {
   return options;
 }
 
-module.exports.create = create;
+module.exports.create                 = create;
 module.exports.getPythonScriptResults = getPythonScriptResults;
-module.exports.checkPython = checkPython;
-
-module.exports.setDefaultEnv = value => defaultEnv = value;
-module.exports.getDefaultEnv = () => defaultEnv;
+module.exports.checkPython            = checkPython;

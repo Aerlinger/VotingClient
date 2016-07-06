@@ -1,6 +1,11 @@
-#!/usr/bin/env python
+#!/Users/Aerlinger/.pyenv/versions/2.7.11/bin/python
 
-print sys.version_info
+import getpass
+
+import sys
+
+sys.stderr.write(str(sys.version_info))
+sys.stderr.write(str(getpass.getuser()))
 
 # start compatibility with IPython Jupyter 4.0
 try:

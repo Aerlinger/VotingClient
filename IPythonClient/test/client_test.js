@@ -1,18 +1,21 @@
 'use strict';
 
+import { expect} from 'chai';
+
 const AsciiToHtml = require('ansi-to-html'),
-  sinon = require('sinon'),
-  dirname = __dirname.split('/').pop(),
-  filename = __filename.split('/').pop().split('.').shift(),
-  lib = require('./' + filename),
-  processes = require('../../services/processes'),
-  fs = require('fs'),
-  path = require('path'),
-  example1 = fs.readFileSync(path.resolve('./test/mocks/jupyter_examples/example_1.py'), {encoding: 'UTF8'}),
-  example2 = fs.readFileSync(path.resolve('./test/mocks/jupyter_examples/example_2.py'), {encoding: 'UTF8'}),
-  example3 = fs.readFileSync(path.resolve('./test/mocks/jupyter_examples/example_3.py'), {encoding: 'UTF8'}),
-  example4 = fs.readFileSync(path.resolve('./test/mocks/jupyter_examples/example_4.py'), {encoding: 'UTF8'}),
-  example5 = fs.readFileSync(path.resolve('./test/mocks/jupyter_examples/example_5.py'), {encoding: 'UTF8'});
+      sinon = require('sinon'),
+      fs = require('fs'),
+      path = require('path'),
+      example1 = fs.readFileSync(path.resolve('./test/mocks/jupyter_examples/example_1.py'), {encoding: 'UTF8'}),
+      example2 = fs.readFileSync(path.resolve('./test/mocks/jupyter_examples/example_2.py'), {encoding: 'UTF8'}),
+      example3 = fs.readFileSync(path.resolve('./test/mocks/jupyter_examples/example_3.py'), {encoding: 'UTF8'}),
+      example4 = fs.readFileSync(path.resolve('./test/mocks/jupyter_examples/example_4.py'), {encoding: 'UTF8'}),
+      example5 = fs.readFileSync(path.resolve('./test/mocks/jupyter_examples/example_5.py'), {encoding: 'UTF8'});
+
+const dirname = '../src/client/';
+const filename = 'index';
+const lib = require(dirname + filename);
+const processes = require('../src/services/processes');
 
 describe(dirname + '/' + filename, function () {
   let sandbox;
@@ -143,7 +146,7 @@ describe(dirname + '/' + filename, function () {
 
       it('recognizes "print"', function () {
         const code = 'print "Hello"',
-          cursorPos = 4;
+              cursorPos = 4;
 
         return fn(code, cursorPos).then(function (result) {
           expect(result).to.deep.equal({
@@ -167,8 +170,8 @@ describe(dirname + '/' + filename, function () {
 
       it('inspects', function () {
         const convert = new AsciiToHtml(),
-          code = 'obj_or_dict = {"akey": "value", "another": "value2"}',
-          cursorPos = 0;
+              code = 'obj_or_dict = {"akey": "value", "another": "value2"}',
+              cursorPos = 0;
 
         return client.execute(code).then(function () {
           return fn(code, cursorPos);
@@ -287,10 +290,11 @@ describe(dirname + '/' + filename, function () {
         this.timeout(20000);
 
         return fn.call(client, example1).then(function (result) {
+          console.log(result)
           expect(result).to.have.property('data').that.is.an('object')
-            .with.property('image/png').that.is.an('string');
+                        .with.property('image/png').that.is.an('string');
           expect(result).to.have.deep.property('metadata').that.is.an('object')
-            .that.deep.equals({});
+                        .that.deep.equals({});
         });
       });
 
@@ -299,9 +303,9 @@ describe(dirname + '/' + filename, function () {
 
         return fn.call(client, example2).then(function (result) {
           expect(result).to.have.property('data').that.is.an('object')
-            .with.property('text/html').that.is.an('string');
+                        .with.property('text/html').that.is.an('string');
           expect(result).to.have.deep.property('metadata').that.is.an('object')
-            .that.deep.equals({});
+                        .that.deep.equals({});
         });
       });
 
@@ -310,11 +314,11 @@ describe(dirname + '/' + filename, function () {
 
         return fn.call(client, example3).then(function (result) {
           expect(result).to.have.property('data').that.is.an('object')
-            .with.property('text/plain').that.is.an('string');
+                        .with.property('text/plain').that.is.an('string');
           expect(result).to.have.property('data').that.is.an('object')
-            .with.property('text/html').that.is.an('string');
+                        .with.property('text/html').that.is.an('string');
           expect(result).to.have.deep.property('metadata').that.is.an('object')
-            .that.deep.equals({});
+                        .that.deep.equals({});
         });
       });
 
@@ -335,9 +339,9 @@ describe(dirname + '/' + filename, function () {
 
         return fn.call(client, example2).then(function (result) {
           expect(result).to.have.property('data').that.is.an('object')
-            .with.property('text/html').that.is.an('string');
+                        .with.property('text/html').that.is.an('string');
           expect(result).to.have.deep.property('metadata').that.is.an('object')
-            .that.deep.equals({});
+                        .that.deep.equals({});
         });
       });
     });
