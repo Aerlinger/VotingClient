@@ -20,3 +20,13 @@
 - `Vote` and `Winner` are only used by parent components that give them all the props they need. They don't need wiring up either.
 - What's left are the components we use in routes: `Voting` and `Results`. They are currently getting data in as hardcoded placeholder props from `App`. These are the components that need to be wired up to the Store.
 
+
+### Client-side Lifecycle:
+
+1. The user clicks a vote button. A VOTE action is dispatched.
+2. The remote action middleware sends the action over the Socket.io connection.
+3. The client-side Redux store handles the action, causing the local hasVote state to be set.
+4. When the message arrives on the server, the serverside Redux store handles the action, updating the vote in the tally.
+5. The listener on the serverside Redux store broadcasts a state snapshot to all connected clients.
+6. A SET_STATE action is dispatched to the Redux store of every connected client.
+7. The Redux store of every connected client handles the SET_STATE action with the updated state from the server.
