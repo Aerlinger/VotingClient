@@ -1,39 +1,30 @@
 import React from 'react'
-import Footer from './Footer'
-
-import AddTodo from '../containers/AddTodo'
-import VisibleTodoList from '../containers/VisibleTodoList'
+// import Footer from './Footer'
 
 import brace from 'brace';
-import AceEditor from 'react-ace';
+import Editor from './Editor';
 import Markdown from 'markdown-it/dist/markdown-it.js'
 import MDReactComponent from 'markdown-react-js'
 
-import { addTodo } from '../actions'
+import { updateText } from '../actions'
 
 import 'brace/mode/python';
 import 'brace/theme/github';
 
 function onChange(newValue) {
-  console.log('change',newValue);
+  console.log('change', newValue);
 }
 
+export default class App extends React.Component {
+  render() {
+    return (
+      <div>
+        <Editor
+          onChange={ (text) => console.log(text) }
+        />
 
-
-const App = () => (
-  <div>
-
-    <AceEditor
-      mode="python"
-      theme="github"
-      onChange={onChange}
-      name="ace-editor"
-      editorProps={{$blockScrolling: true}}
-    />
-
-    <MDReactComponent text="Some text with **emphasis!**"/>
-
-  </div>
-);
-
-export default App
+        <MDReactComponent text="Some text with **emphasis!**"/>
+      </div>
+    )
+  }
+}

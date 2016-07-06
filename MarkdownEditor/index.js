@@ -3,10 +3,15 @@ import { render } from 'react-dom'
 import { Provider } from 'react-redux'
 import { createStore } from 'redux'
 
-import todoApp from './reducers'
+import AppReducers from './reducers'
 import App from './components/App'
 
-const store = createStore(todoApp);
+const store = createStore(
+  AppReducers,
+  {},
+  window.devToolsExtension ? window.devToolsExtension() : f => f
+);
+
 
 render(
   <Provider store={store}>
