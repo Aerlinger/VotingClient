@@ -1,9 +1,7 @@
 import React, { PropTypes } from 'react'
-
 import { connect } from 'react-redux'
-import { bindActionCreators } from 'redux'
 
-
+import Markdown from 'markdown-it/dist/markdown-it.js'
 import MDReactComponent from 'markdown-react-js'
 
 const mapStateToProps = (state, ownProps) => {

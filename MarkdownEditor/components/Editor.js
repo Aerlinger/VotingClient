@@ -1,10 +1,12 @@
 import React, { PropTypes } from 'react'
-import AceEditor from 'react-ace'
 import { connect } from 'react-redux'
-import { bindActionCreators } from 'redux'
+
+import AceEditor from 'react-ace'
+import brace from 'brace';
+import 'brace/mode/python';
+import 'brace/theme/github';
 
 import { updateText } from '../actions'
-
 
 const mapStateToProps = (state, ownProps) => ({
   value: state.editor.text
@@ -12,9 +14,6 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   onChange(text) {
-    console.log("dipatch: ", dispatch)
-    console.log("dipatch (own): ", ownProps)
-
     dispatch(updateText(text))
   }
 });
@@ -32,6 +31,8 @@ class EditorComponent extends React.Component {
         mode="python"
         theme="github"
         name="ace-editor"
+        width="100%"
+        showGutter={true}
         onChange={this.props.onChange}
         
         value={this.props.value}
