@@ -8,6 +8,8 @@ const win = doc.defaultView;
 global.document = doc;
 global.window = win;
 
+// console.log(process.env)
+
 // Make window's functions callable globally
 Object.keys(window).forEach((key) => {
   if (!(key in global)) {

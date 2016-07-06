@@ -17,7 +17,7 @@ const filename = 'index';
 const lib = require(dirname + filename);
 const processes = require('../src/services/processes');
 
-describe(dirname + '/' + filename, function () {
+describe("Jupyter Client", function () {
   let sandbox;
 
   beforeEach(function () {
@@ -31,13 +31,15 @@ describe(dirname + '/' + filename, function () {
   describe('create', function () {
     const fn = lib[this.title];
 
-    it('creates', function () {
-      this.timeout(10000);
+    it('creates', function(done) {
+      this.timeout(2000);
       return fn().then(function (client) {
         expect(processes.getChildren().length).to.equal(1);
         return client.kill();
+        done()
       }).then(function () {
         expect(processes.getChildren().length).to.equal(0);
+        done()
       });
     });
   });
@@ -45,16 +47,19 @@ describe(dirname + '/' + filename, function () {
   describe('checkPython', function () {
     const fn = lib[this.title];
 
-    it('checks', function () {
+    it('checks', function (done) {
       this.timeout(10000);
 
       return fn({}).then(function (result) {
+
         expect(result).to.have.property('hasJupyterKernel').that.is.a('boolean');
         expect(result).to.have.property('cwd').that.is.a('string');
         expect(result).to.have.property('version').that.is.a('string');
         expect(result).to.have.property('executable').that.is.a('string');
         expect(result).to.have.property('argv').that.is.an('array');
         expect(result).to.have.property('packages').that.is.an('array');
+
+        done()
       });
     });
   });
@@ -62,16 +67,18 @@ describe(dirname + '/' + filename, function () {
   describe('JupyterClient', function () {
     let client;
 
-    before(function () {
+    before(function (done) {
       this.timeout(10000);
       return lib.create().then(function (newClient) {
         client = newClient;
+        done()
       });
     });
 
-    after(function () {
+    after(function (done) {
       if (client) {
         return client.kill();
+        done()
       }
     });
 
@@ -83,9 +90,10 @@ describe(dirname + '/' + filename, function () {
         fn = client[title].bind(client);
       });
 
-      it('evals', function () {
+      it('evals', function (done) {
         return fn('[]').then(function (result) {
           expect(result).to.deep.equal([]);
+          done()
         });
       });
     });
@@ -98,23 +106,25 @@ describe(dirname + '/' + filename, function () {
         fn = client[title].bind(client);
       });
 
-      it('gets docstrings when empty list', function () {
+      it('gets docstrings when empty list', function (done) {
         this.timeout(10000);
         return fn([]).then(function (result) {
           expect(result).to.deep.equal({
             name: 'stdout',
             text: '[]\n'
           });
+          done()
         });
       });
 
-      it('gets docstrings with global names', function () {
+      it('gets docstrings with global names', function (done) {
         this.timeout(10000);
         return fn(['sys']).then(function (result) {
           expect(result).to.deep.equal({
             name: 'stdout',
             text: '[{\"text\": \"sys\", \"docstring\": \"no docstring provided\", \"dtype\": \"---\"}]\n'
           });
+          done()
         });
       });
     });
@@ -127,11 +137,12 @@ describe(dirname + '/' + filename, function () {
         fn = client[title].bind(client);
       });
 
-      it('gets variables when empty', function () {
-        this.timeout(10000);
+      it('gets variables when empty', function (done) {
+        this.timeout(2000);
         return fn([]).then(function (result) {
           expect(result).to.deep.equal({function: [], Series: [], list: [], DataFrame: [], other: [], dict: [], ndarray: []});
           expect(result).to.deep.equal({function: [], Series: [], list: [], DataFrame: [], other: [], dict: [], ndarray: []});
+          done()
         });
       });
     });

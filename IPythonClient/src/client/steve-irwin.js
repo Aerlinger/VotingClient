@@ -44,6 +44,10 @@ let ruleSet = [
   },
   {
     when: _.overSome(_.matches({platform: 'linux'}), _.matches({platform: 'darwin'})),
+    then: {cmd: '~/.pyenv/shims/python', shell: '/bin/bash', label: 'python'}
+  },
+  {
+    when: _.overSome(_.matches({platform: 'linux'}), _.matches({platform: 'darwin'})),
     then: {cmd: '~/anaconda2/bin/python', shell: '/bin/bash', label: 'anaconda2'}
   },
   {

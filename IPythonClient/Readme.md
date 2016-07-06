@@ -24,3 +24,6 @@
 }
 ```
  
+ ### Note: 
+ 
+ - Tests don't work when run from webstorm (env not loaded properly)

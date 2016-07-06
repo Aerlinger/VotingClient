@@ -6,7 +6,7 @@
 'use strict';
 
 const _ = require('lodash'),
-  fs = require('fs');
+      fs = require('fs');
 
 /**
  * @param {object} args
@@ -15,8 +15,6 @@ const _ = require('lodash'),
 function toPythonArgs(args) {
   return _.reduce(args, function (obj, value, key) {
     obj[_.snakeCase(key)] = value;
-    console.log("PYTHON ARGS");
-    console.log(obj);
     return obj;
   }, {});
 }
@@ -32,10 +30,9 @@ function setDefaultEnvVars(env) {
     if (_.isString(env.PATH)) {
       const envs = env.PATH.split(':');
 
-      addPath(envs, '/Users/Aerlinger/.pyenv/shims');
-      // addPath(envs, '/sbin');
-      // addPath(envs, '/usr/sbin');
-      // addPath(envs, '/usr/local/bin');
+      addPath(envs, '/sbin');
+      addPath(envs, '/usr/sbin');
+      addPath(envs, '/usr/local/bin');
 
       env.PATH = envs.join(':');
     }

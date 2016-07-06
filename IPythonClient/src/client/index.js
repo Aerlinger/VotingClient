@@ -70,6 +70,28 @@ function listenToChild(client, child) {
   child.on('error', _.partial(handleProcessStreamEvent, client, 'error'));
 }
 
+
+/**
+ * Write object to script.
+ * @param {ChildProcess} childProcess
+ * @param {object} obj
+ * @returns {Promise}
+ */
+function write(childProcess, obj) {
+  return new bluebird(function (resolve, reject) {
+    let result = childProcess.stdin.write(JSON.stringify(obj) + '\n', function (error) {
+      if (!result) {
+        reject(new Error('Unable to write to stdin'));
+      } else if (error) {
+        reject(error);
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
+
 /**
  * @param {JupyterClient} client
  * @param {object} invocation
@@ -298,6 +320,9 @@ class JupyterClient extends EventEmitter {
  */
 function getPythonCommandOptions(options) {
   options = resolveHomeDirectory(options);
+
+  log('info', 'get Python Command Options', options);
+  console.log('info', 'CONSOLE LOG Python Command Options', options);
 
   return _.assign({
     env:      pythonLanguage.setDefaultEnvVars(process.env),
