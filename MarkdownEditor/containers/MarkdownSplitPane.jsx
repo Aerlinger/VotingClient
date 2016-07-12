@@ -1,10 +1,10 @@
 import React from 'react'
 
-import Editor from './Editor';
-import MarkdownFrame from './MarkdownFrame';
+import Editor from '../components/Editor';
+import MarkdownFrame from '../components/MarkdownFrame';
 
 
-export default class App extends React.Component {
+export default class MarkdownSplitPane extends React.Component {
 
   render() {
     return (
@@ -19,7 +19,7 @@ export default class App extends React.Component {
           <MarkdownFrame />
         </div>
       </div>
+
     )
   }
-  
 }

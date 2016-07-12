@@ -1,10 +1,13 @@
 import React from 'react'
-import { render } from 'react-dom'
+import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
+import { Router, Route, hashHistory } from 'react-router'
 import { createStore } from 'redux'
 
 import AppReducers from './reducers'
 import App from './components/App'
+import MarkdownSplitPane from './containers/MarkdownSplitPane'
+
 
 const store = createStore(
   AppReducers,
@@ -16,9 +19,13 @@ const store = createStore(
   window.devToolsExtension ? window.devToolsExtension() : f => f
 );
 
-render(
+const routes = <Route component={App}>
+  <Route path="/" component={MarkdownSplitPane} />
+</Route>;
+
+ReactDOM.render(
   <Provider store={store}>
-    <App />
+    <Router history={hashHistory}>{routes}</Router>
   </Provider>,
   document.getElementById('root')
 );
