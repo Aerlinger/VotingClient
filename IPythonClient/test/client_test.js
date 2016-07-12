@@ -12,9 +12,7 @@ const AsciiToHtml = require('ansi-to-html'),
       example4 = fs.readFileSync(path.resolve('./test/mocks/jupyter_examples/example_4.py'), {encoding: 'UTF8'}),
       example5 = fs.readFileSync(path.resolve('./test/mocks/jupyter_examples/example_5.py'), {encoding: 'UTF8'});
 
-const dirname = '../src/client/';
-const filename = 'index';
-const lib = require(dirname + filename);
+const jupyterClient = require('../src/client/index');
 const processes = require('../src/services/processes');
 
 describe("Jupyter Client", function () {
@@ -28,29 +26,25 @@ describe("Jupyter Client", function () {
     sandbox.restore();
   });
 
-  describe('create', function () {
-    const fn = lib[this.title];
-
-    it('creates', function(done) {
-      this.timeout(2000);
-      return fn().then(function (client) {
+  describe('create', function() {
+    it('creates', function() {
+      this.timeout(10000);
+      return jupyterClient.create()
+                          .then(function (client) {
         expect(processes.getChildren().length).to.equal(1);
         return client.kill();
-        done()
-      }).then(function () {
+      }).then(function() {
         expect(processes.getChildren().length).to.equal(0);
-        done()
       });
     });
   });
 
   describe('checkPython', function () {
-    const fn = lib[this.title];
-
-    it('checks', function (done) {
+    it('checks', function () {
       this.timeout(10000);
 
-      return fn({}).then(function (result) {
+      return jupyterClient.checkPython({})
+                          .then(function (result) {
 
         expect(result).to.have.property('hasJupyterKernel').that.is.a('boolean');
         expect(result).to.have.property('cwd').that.is.a('string');
@@ -59,7 +53,6 @@ describe("Jupyter Client", function () {
         expect(result).to.have.property('argv').that.is.an('array');
         expect(result).to.have.property('packages').that.is.an('array');
 
-        done()
       });
     });
   });
@@ -67,22 +60,21 @@ describe("Jupyter Client", function () {
   describe('JupyterClient', function () {
     let client;
 
-    before(function (done) {
+    before(function() {
       this.timeout(10000);
-      return lib.create().then(function (newClient) {
+      return jupyterClient.create()
+                          .then(function(newClient) {
         client = newClient;
-        done()
       });
     });
 
-    after(function (done) {
+    after(function () {
       if (client) {
         return client.kill();
-        done()
       }
     });
 
-    describe('getEval', function () {
+    describe('getEval', function() {
       const title = this.title;
       let fn;
 
@@ -90,41 +82,38 @@ describe("Jupyter Client", function () {
         fn = client[title].bind(client);
       });
 
-      it('evals', function (done) {
+      it('evals', function () {
         return fn('[]').then(function (result) {
           expect(result).to.deep.equal([]);
-          done()
         });
       });
     });
 
-    describe('getDocStrings', function () {
+    describe('getDocStrings', function() {
       const title = this.title;
       let fn;
 
-      before(function () {
+      before(function() {
         fn = client[title].bind(client);
       });
 
-      it('gets docstrings when empty list', function (done) {
+      it('gets docstrings when empty list', function() {
         this.timeout(10000);
         return fn([]).then(function (result) {
           expect(result).to.deep.equal({
             name: 'stdout',
             text: '[]\n'
           });
-          done()
         });
       });
 
-      it('gets docstrings with global names', function (done) {
+      it('gets docstrings with global names', function() {
         this.timeout(10000);
         return fn(['sys']).then(function (result) {
           expect(result).to.deep.equal({
             name: 'stdout',
             text: '[{\"text\": \"sys\", \"docstring\": \"no docstring provided\", \"dtype\": \"---\"}]\n'
           });
-          done()
         });
       });
     });
@@ -137,12 +126,11 @@ describe("Jupyter Client", function () {
         fn = client[title].bind(client);
       });
 
-      it('gets variables when empty', function (done) {
-        this.timeout(2000);
+      it('gets variables when empty', function() {
+        this.timeout(10000);
         return fn([]).then(function (result) {
           expect(result).to.deep.equal({function: [], Series: [], list: [], DataFrame: [], other: [], dict: [], ndarray: []});
           expect(result).to.deep.equal({function: [], Series: [], list: [], DataFrame: [], other: [], dict: [], ndarray: []});
-          done()
         });
       });
     });

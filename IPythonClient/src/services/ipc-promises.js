@@ -1,8 +1,8 @@
 'use strict';
 
-const _ = require('lodash'),
-  bluebird = require('bluebird'),
-  log = require('./log').asInternal(__filename);
+const _        = require('lodash');
+const bluebird = require('bluebird');
+const log      = require('./log').asInternal(__filename);
 
 /**
  * @param {string} name
@@ -10,19 +10,19 @@ const _ = require('lodash'),
  * @param {Event} event
  * @returns {function}
  */
-function replyToEvent(name, id, event) {
+function _replyToEvent(name, id, event) {
   const replyName = name + '_reply';
 
-  return function (data) {
+  return function(data) {
     try {
       if (_.isError(data)) {
         log('error', 'event failed', id, name, data);
-        event.sender.send(replyName, id, {name: data.name, message: data.message});
+        event.sender.send(replyName, id, { name: data.name, message: data.message });
       } else {
         log('info', 'event succeeded', id, name, data);
         event.sender.send(replyName, id, null, data);
       }
-    } catch (ex) {
+    } catch(ex) {
       log('error', 'failed to reply to event', id, name, data, ex);
     }
   };
@@ -43,20 +43,20 @@ function replyToEvent(name, id, event) {
  * @param {[function]} list
  */
 function exposeElectronIpcEvents(ipcEmitter, list) {
-  _.each(list, function (fn) {
+  _.each(list, function(fn) {
     const name = _.camelCase(fn.name.replace(/^on/, ''));
 
     log('debug', 'exposeElectronIpcEvents exposing', name);
 
-    ipcEmitter.on(name, function (event, id) {
+    ipcEmitter.on(name, function(event, id) {
       try {
         const args = _.slice(arguments, 2);
 
         log('info', 'responding to ipc event', id, name, args);
         bluebird.try(() => fn.apply(event.sender, args))
-          .then(replyToEvent(name, id, event))
-          .catch(replyToEvent(name, id, event));
-      } catch (ex) {
+                .then(_replyToEvent(name, id, event))
+                .catch(_replyToEvent(name, id, event));
+      } catch(ex) {
         log('error', 'failed to wait for reply to event', id, name, event, ex);
       }
     });

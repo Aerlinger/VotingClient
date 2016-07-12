@@ -1,27 +1,27 @@
 'use strict';
 
-const _ = require('lodash'),
-  bluebird = require('bluebird'),
-  processes = require('./processes');
+const _         = require('lodash');
+const bluebird  = require('bluebird');
+const processes = require('./processes');
 
 /**
  * @returns {Promise}
  */
-function getBashEnv() {
-  return new bluebird(function (resolve) {
+function _getBashEnv() {
+  return new bluebird(function(resolve) {
     const child = processes.create('/bin/bash', ['--login', '-c', 'env']);
-    let stdout = [];
+    let stdout  = [];
 
     child.stdout.on('data', data => stdout.push(data));
-    child.on('close', function () {
-      const str = stdout.join(''),
-        lines = str.split('\n'),
-        env = {};
+    child.on('close', function() {
+      const str   = stdout.join(''),
+            lines = str.split('\n'),
+            env   = {};
 
-      _.each(lines, function (line) {
+      _.each(lines, function(line) {
         const split = line.split('=', 2),
-          key = split[0],
-          value = split[1];
+              key   = split[0],
+              value = split[1];
 
         if (key && value) {
           env[key] = value;
@@ -36,8 +36,8 @@ function getBashEnv() {
 /**
  * @returns {Promise}
  */
-function getCmdEnv() {
-  return new bluebird(function (resolve) {
+function _getCmdEnv() {
+  return new bluebird(function(resolve) {
     resolve([]);
   });
 }
@@ -48,10 +48,10 @@ function getCmdEnv() {
  */
 function getEnv() {
   if (process.platform === 'darwin' || process.platform === 'linux') {
-    return getBashEnv();
+    return _getBashEnv();
   }
 
-  return getCmdEnv();
+  return _getCmdEnv();
 }
 
 module.exports.getEnv = getEnv;

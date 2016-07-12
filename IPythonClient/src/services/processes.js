@@ -9,7 +9,7 @@ const _ = require('lodash'),
 /**
  * @param {ChildProcess} child
  */
-function addChild(child) {
+function _addChild(child) {
   children.push(child);
   log('debug', 'added child process', child.pid, ';', children.length, 'children running');
 }
@@ -39,7 +39,7 @@ function create(str, args, options) {
   const child = childProcess.spawn(str, args || options, args && options)
     .on('close', () => removeChild(child));
 
-  addChild(child);
+  _addChild(child);
   return child;
 }
 
