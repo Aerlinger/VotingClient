@@ -19,7 +19,9 @@
     "iron-input": "PolymerElements/iron-input#^1.0.0",
     "iron-selector": "PolymerElements/iron-selector#^1.0.0",
     "pace": "1.0.2",
-    "polymer": "Polymer/polymer#^1.5.0"
+    "polymer": "Polymer/polymer#^1.5.0",
+    "codemirror": "^5.16.0",
+    "ace": "ace-editor#^1.2.3"
   },
   "devDependencies": {}
 }
