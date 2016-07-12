@@ -1,8 +1,7 @@
 import React, { PropTypes } from 'react'
 import { connect } from 'react-redux'
 
-import Markdown from 'markdown-it/dist/markdown-it.js'
-import MDReactComponent from 'markdown-react-js'
+import ReactMarkdown from 'react-markdown'
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -19,8 +18,8 @@ class MarkdownComponent extends React.Component {
 
   render() {
     return (
-      <MDReactComponent
-        text={this.props.text}
+      <ReactMarkdown
+        source={this.props.text}
       />
     )
   }
