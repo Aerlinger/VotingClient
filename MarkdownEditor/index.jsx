@@ -21,6 +21,8 @@ const store = createStore(
 
 const routes = <Route component={App}>
   <Route path="/" component={MarkdownSplitPane} />
+  <Route path="/ace" component={MarkdownSplitPane} />
+  <Route path="/codemirror" component={MarkdownSplitPane} />
 </Route>;
 
 ReactDOM.render(

@@ -9,31 +9,30 @@ const util                     = require('util');
 
 winston.transports.ElectronLogger = electronWinstonTransport;
 
-let logLevel   = process.env.RODEO_LOG_LEVEL || 'info',
-    transports = [
-      new winston.transports.ElectronLogger({
-        level: logLevel
-      }),
-      new winston.transports.Console({
-        level:                           logLevel,
-        colorize:                        true,
-        humanReadableUnhandledException: true
-      }),
-      new winston.transports.File({
-        filename:    path.join(require('os').homedir(), 'rodeo.log'),
-        level:       logLevel,
-        maxFiles:    2,
-        maxsize:     1024 * 1024,
-        tailable:    true,
-        json:        false,
-        colorize:    false,
-        prettyPrint: true
-      })
-    ],
-    logger     = new winston.Logger({
-      transports:  transports,
-      exitOnError: false
-    });
+let logLevel   = process.env.RODEO_LOG_LEVEL || 'info';
+
+let transports = [
+  new winston.transports.Console({
+    level:                           logLevel,
+    colorize:                        true,
+    humanReadableUnhandledException: true
+  }),
+  new winston.transports.File({
+    filename:    path.join(require('os').homedir(), 'rodeo.log'),
+    level:       logLevel,
+    maxFiles:    2,
+    maxsize:     1024 * 1024,
+    tailable:    true,
+    json:        false,
+    colorize:    false,
+    prettyPrint: true
+  })
+];
+
+let logger     = new winston.Logger({
+  transports:  transports,
+  exitOnError: false
+});
 
 winston.handleExceptions(transports);
 

@@ -17,10 +17,12 @@
   },
   "homepage": "http://redux.js.org",
   "dependencies": {
+    "codemirror": "^5.16.0",
     "markdown-it": "^7.0.0",
     "markdown-it-math": "^4.0.1",
     "react": "^15.2.0",
     "react-ace": "^3.5.0",
+    "react-codemirror": "^0.2.6",
     "react-dom": "^15.2.0",
     "react-markdown": "^2.4.2",
     "react-redux": "^4.4.5",

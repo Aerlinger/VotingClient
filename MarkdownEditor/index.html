@@ -3,13 +3,24 @@
 <head>
   <title>Editor example</title>
   <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+
+  <script src="./bower_components/codemirror/lib/codemirror.js"></script>
+  <script src="./bower_components/codemirror/mode/javascript/javascript.js"></script>
+  <link rel="stylesheet" href="./bower_components/codemirror/lib/codemirror.js">
 </head>
 <body>
 
 <div id="root"></div>
 
-<script src="/static/bundle.js"></script>
 
+<script>
+  var myCodeMirror = CodeMirror(document.body, {
+    value: "function myScript(){return 100;}\n",
+    mode:  "javascript"
+  });
+</script>
+
+<!--<script src="/static/bundle.js"></script>-->
 
 
 </body>
