@@ -46,7 +46,7 @@ function createObjectEmitter(stream) {
  * @param {object} data
  */
 function handleProcessStreamEvent(client, source, data) {
-  // log('info', 'client event', source, data);
+  log('info', 'client event', source, data);
 
   client.emit('event', source, data);
 }
@@ -79,6 +79,7 @@ function listenToChild(client, child) {
  */
 function write(childProcess, obj) {
   return new bluebird(function(resolve, reject) {
+    console.log("Requesting", JSON.stringify(obj))
     let result = childProcess.stdin.write(JSON.stringify(obj) + '\n', function(error) {
       if (!result) {
         reject(new Error('Unable to write to stdin'));
@@ -200,7 +201,9 @@ class JupyterClient extends EventEmitter {
   getEval(str) {
     return request(this, {
       exec_eval: str
-    }, { successEvent: ['eval_results'] });
+    }, {
+      successEvent: ['eval_results']
+    });
   }
 
   getDocStrings(names) {

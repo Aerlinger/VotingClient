@@ -89,6 +89,12 @@ describe("Jupyter Client", function() {
           expect(result).to.deep.equal([]);
         });
       });
+
+      xit('evals non-json serializable string', function() {
+        return fn('set([1, 1, 1, 2, 3])').then(function(result) {
+          expect(result).to.deep.equal([]);
+        });
+      });
     });
 
     describe('getDocStrings', function() {
