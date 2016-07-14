@@ -54,7 +54,8 @@ def kernel(wd=None, verbose=0):
 
     # apply patches
     dirname = os.path.dirname(os.path.abspath(__file__))
-    python_patch_file = os.path.join(dirname, "langs", "python-patch.py")
+    python_patch_file = os.path.join(dirname, "python_patch.py")
+
     kernel_client.execute("%run " + python_patch_file, {"silent":True, "store_history":False})
 
     # set working directory
@@ -74,6 +75,7 @@ def kernel(wd=None, verbose=0):
         if not input_queue.empty():
             current_timeout = current_timeout_min
             line = input_queue.get().strip()
+
             payload = json.loads(line)
             uid = payload["id"]
             args = payload.get("args", [])
@@ -128,4 +130,5 @@ if __name__=="__main__":
     wd = None
     if len(sys.argv) > 1:
         wd = sys.argv[1]
+
     kernel(wd, verbose=2)

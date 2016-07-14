@@ -1,10 +1,5 @@
 import pprint as pp
 import json
-import ast
-import inspect
-import types
-import re
-
 try:
     import pandas as pd
 except:
@@ -20,15 +15,18 @@ try:
 except:
     pip = None
 
+import ast
+import inspect
+import types
+import re
 
 def __get_docstrings(session, names, is_function):
-    if is_function == True:
+    if is_function==True:
         dtype = "function"
     else:
         dtype = "---"
 
     docstrings = []
-
     for name in names:
         try:
             if name in session:
@@ -43,7 +41,6 @@ def __get_docstrings(session, names, is_function):
             "dtype": dtype,
             "docstring": docstring,
         })
-
     print(json.dumps(docstrings))
 
 def __is_code_finished(code):
@@ -69,7 +66,6 @@ def __get_variables(session):
     }
 
     SPECIAL_VARS = ["In", "Out"]
-
     for variable_name in session.keys():
 
         if variable_name.startswith("_") or variable_name in SPECIAL_VARS:
@@ -118,7 +114,6 @@ def __get_packages():
     if not pip:
         print('[]')
         return
-
     installed_packages = pip.get_installed_distributions()
     packages = [{ "name": i.key, "version": i.version} for i in installed_packages]
     installed_packages_list = sorted(packages, key=lambda x: x['name'])

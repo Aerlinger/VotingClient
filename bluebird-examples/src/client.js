@@ -339,8 +339,8 @@ function _getPythonCommandOptions(options) {
 function _createPythonScriptProcess(targetFile, options) {
   options = _.pick(options || {}, ['shell', 'cmd']);
 
-  const processOptions = _getPythonCommandOptions(options),
-        cmd            = options.cmd || 'python';
+  const processOptions = _getPythonCommandOptions(options);
+  const cmd            = options.cmd || 'python';
 
   return processes.create(cmd, [targetFile], processOptions);
 }
