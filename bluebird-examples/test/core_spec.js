@@ -16,8 +16,6 @@ describe("Bluebird promises", () => {
         );
       });
     };
-
-    // done()
   });
 
   it("can be chained", (done) => {
