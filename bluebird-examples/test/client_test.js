@@ -46,6 +46,7 @@ describe("Jupyter Client", function() {
       return jupyterClient.checkPython({})
                           .then(function(result) {
 
+                            console.log(result)
                             expect(result).to.have.property('hasJupyterKernel').that.is.a('boolean');
                             expect(result).to.have.property('cwd').that.is.a('string');
                             expect(result).to.have.property('version').that.is.a('string');
@@ -308,7 +309,6 @@ describe("Jupyter Client", function() {
         this.timeout(20000);
 
         return fn.call(client, example1).then(function(result) {
-          console.log(result)
           expect(result).to.have.property('data').that.is.an('object')
                         .with.property('image/png').that.is.an('string');
           expect(result).to.have.deep.property('metadata').that.is.an('object')
