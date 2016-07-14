@@ -1,7 +1,7 @@
 'use strict';
 
 const _       = require('lodash');
-const log     = console.log; //require('../services/log').asInternal(__filename);
+const log     = require('./util/log').asInternal(__filename);
 let outputMap = {};
 
 /**
@@ -9,7 +9,7 @@ let outputMap = {};
  * @param {JupyterClient} client
  * @param {JupyterClientResponse} response
  */
-function linkRequestToOutput(client, response) {
+function _linkRequestToOutput(client, response) {
   const requestMap = client.requestMap;
 
   if (!_.isString(response.result)) {
@@ -28,11 +28,11 @@ function linkRequestToOutput(client, response) {
  * @param {JupyterClient} client
  * @param {*} message
  */
-function requestInputFromUser(client, message) {
+function _requestInputFromUser(client, message) {
   client.emit('input_request', message);
 }
 
-function broadcastKernelStatus(client, message) {
+function _broadcastKernelStatus(client, message) {
   client.emit('status', message.content.execution_state);
 }
 
@@ -40,7 +40,7 @@ function broadcastKernelStatus(client, message) {
  * @param {object} request
  * @param {object} result
  */
-function resolveRequest(request, result) {
+function _resolveRequest(request, result) {
   // payload is deprecated, so don't even expose it
   request.deferred.resolve(_.omit(result.content, 'payload', 'engine_info', 'execution_count'));
 
@@ -53,7 +53,7 @@ function resolveRequest(request, result) {
  * @param {{status: string, id: string}} obj
  * @returns {boolean}
  */
-function isStartComplete(obj) {
+function _isStartComplete(obj) {
   return obj.status === 'complete' && obj.id === 'startup-complete';
 }
 
@@ -62,7 +62,7 @@ function isStartComplete(obj) {
  * @param {JupyterClientResponse} response
  * @returns {boolean}
  */
-function isRequestToOutputLink(client, response) {
+function _isRequestToOutputLink(client, response) {
   const requestMap = client.requestMap,
         result     = response.result,
         source     = response.source;
@@ -74,15 +74,15 @@ function isRequestToOutputLink(client, response) {
  * @param {JupyterClientResponse} response
  * @returns {boolean}
  */
-function isExecutionResult(response) {
+function _isExecutionResult(response) {
   const parentMessageId = _.get(response, 'result.parent_header.msg_id'),
         msg_type        = _.get(response, 'result.msg_type'),
         isReply         = msg_type && _.endsWith(msg_type, '_reply');
 
   if (_.size(outputMap) === 0 && isReply) {
-    log('warn', msg_type, 'without anyone waiting for output', outputMap, response);
+    // log('warn', msg_type, 'without anyone waiting for output', outputMap, response);
   } else if (isReply && !!outputMap[parentMessageId]) {
-    log('warn', msg_type, 'without parent waiting for output', outputMap, response);
+    // log('warn', msg_type, 'without parent waiting for output', outputMap, response);
   }
 
   return !!outputMap[parentMessageId];
@@ -94,7 +94,7 @@ function isExecutionResult(response) {
  * @param {JupyterClient} client  Map of all current requests
  * @returns {boolean}
  */
-function isRequestResolution(parent, child, client) {
+function _isRequestResolution(parent, child, client) {
   const requestMap = client.requestMap;
   let request      = requestMap[parent.id];
 
@@ -114,7 +114,7 @@ function isRequestResolution(parent, child, client) {
  * @param {{msg_type: string}} child
  * @returns {boolean}
  */
-function isInputRequestMessage(source, child) {
+function _isInputRequestMessage(source, child) {
   return source === 'stdin' && child.msg_type === 'input_request';
 }
 
@@ -123,7 +123,7 @@ function isInputRequestMessage(source, child) {
  * @param {JupyterClient} client
  * @param {JupyterClientResponse} response
  */
-function resolveExecutionResult(client, response) {
+function _resolveExecutionResult(client, response) {
   const source      = response.source,
         result      = response.result,
         outputMapId = _.get(result, 'parent_header.msg_id');
@@ -138,14 +138,14 @@ function resolveExecutionResult(client, response) {
     parent.header = result.parent_header;
   }
 
-  if (isInputRequestMessage(source, child)) {
-    requestInputFromUser(client, result);
-  } else if (isRequestResolution(parent, child, client)) {
-    resolveRequest(request, result);
+  if (_isInputRequestMessage(source, child)) {
+    _requestInputFromUser(client, result);
+  } else if (_isRequestResolution(parent, child, client)) {
+    _resolveRequest(request, result);
 
 
   } else if (child.msg_type === 'status') {
-    broadcastKernelStatus(client, result);
+    _broadcastKernelStatus(client, result);
   }
 
   if (!request.hidden) {
@@ -157,7 +157,7 @@ function resolveExecutionResult(client, response) {
  * @param {JupyterClientResponse} response
  * @returns {boolean}
  */
-function isEvalResult(response) {
+function _isEvalResult(response) {
   const source = response.source;
 
   return source === 'eval' && _.isString(response.id);
@@ -168,7 +168,7 @@ function isEvalResult(response) {
  * @param {JupyterClient} client
  * @param {JupyterClientResponse} response
  */
-function resolveEvalResult(client, response) {
+function _resolveEvalResult(client, response) {
   const result  = response.result,
         request = client.requestMap[response.id];
 
@@ -181,14 +181,14 @@ function resolveEvalResult(client, response) {
  * @param {JupyterClientResponse} response
  */
 function handle(client, response) {
-  if (isStartComplete(response)) {
+  if (_isStartComplete(response)) {
     client.emit('ready');
-  } else if (isRequestToOutputLink(client, response)) {
-    linkRequestToOutput(client, response);
-  } else if (isExecutionResult(response)) {
-    resolveExecutionResult(client, response);
-  } else if (isEvalResult(response)) {
-    resolveEvalResult(client, response);
+  } else if (_isRequestToOutputLink(client, response)) {
+    _linkRequestToOutput(client, response);
+  } else if (_isExecutionResult(response)) {
+    _resolveExecutionResult(client, response);
+  } else if (_isEvalResult(response)) {
+    _resolveEvalResult(client, response);
   } else if (response.result && response.source) {
     client.emit(response.source, response);
   } else if (response.id && response.result === null) {

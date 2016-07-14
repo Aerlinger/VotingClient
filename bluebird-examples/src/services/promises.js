@@ -1,32 +1,35 @@
 'use strict';
 
-const _ = require('lodash'),
-      bluebird = require('bluebird');
+const _        = require('lodash');
+const bluebird = require('bluebird');
 
 /**
  * @param {EventEmitter} eventEmitter
- * @param {{resolve: (string|Array), reject: (string|Array), resolveTransform: function, rejectTransform: function}} events
+ * @param {{resolve: (string|Array), reject: (string|Array), resolveTransform: function, rejectTransform: function}}
+ *   events
  * @returns {Promise}
  */
 function eventsToPromise(eventEmitter, events) {
-  const rejections = _.isString(events.reject) ? [events.reject] : events.reject,
-        resolutions = _.isString(events.resolve) ? [events.resolve] : events.resolve,
-        resolveTransform = events.resolveTransform || _.identity,
-        rejectTransform = events.rejectTransform || _.identity;
+  const rejections       = _.isString(events.reject) ? [events.reject] : events.reject;
+  const resolutions      = _.isString(events.resolve) ? [events.resolve] : events.resolve;
+  const resolveTransform = events.resolveTransform || _.identity;
+  const rejectTransform  = events.rejectTransform || _.identity;
 
-  return new bluebird(function (resolve, reject) {
+  return new bluebird(function(resolve, reject) {
+
     // noinspection JSDuplicatedDeclaration
     let resolveReady, rejectError,
-        removeListeners = function () {
+        removeListeners = function() {
           rejections.map(name => eventEmitter.removeListener(name, rejectError));
           resolutions.map(name => eventEmitter.removeListener(name, resolveReady));
         };
 
-    resolveReady = function (data, name) {
+    resolveReady = function(data, name) {
       resolve(resolveTransform(data, name));
       removeListeners();
     };
-    rejectError = function (error, name) {
+
+    rejectError = function(error, name) {
       reject(rejectTransform(error, name));
       removeListeners();
     };

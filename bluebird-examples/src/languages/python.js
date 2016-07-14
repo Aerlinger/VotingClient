@@ -5,15 +5,15 @@
 
 'use strict';
 
-const _ = require('lodash'),
-      fs = require('fs');
+const _  = require('lodash');
+const fs = require('fs');
 
 /**
  * @param {object} args
  * @returns {object}
  */
 function toPythonArgs(args) {
-  return _.reduce(args, function (obj, value, key) {
+  return _.reduce(args, function(obj, value, key) {
     obj[_.snakeCase(key)] = value;
     return obj;
   }, {});
@@ -43,5 +43,5 @@ function setDefaultEnvVars(env) {
   }, env);
 }
 
-module.exports.toPythonArgs = toPythonArgs;
+module.exports.toPythonArgs      = toPythonArgs;
 module.exports.setDefaultEnvVars = setDefaultEnvVars;

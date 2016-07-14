@@ -1,14 +1,14 @@
-const _              = require('lodash'),
-      bluebird       = require('bluebird'),
-      clientResponse = require('./client-response'),
-      EventEmitter   = require('events'),
-      StreamSplitter = require('stream-splitter'),
-      log            = console.log, // require('../services/log').asInternal(__filename),
-      path           = require('path'),
-      processes      = require('./services/processes'),
-      promises       = require('./services/promises'),
-      pythonLanguage = require('./languages/python'),
-      uuid           = require('uuid');
+const _              = require('lodash');
+const bluebird       = require('bluebird');
+const clientResponse = require('./client-response');
+const EventEmitter   = require('events');
+const StreamSplitter = require('stream-splitter');
+const log            = require('./util/log').asInternal(__filename);
+const path           = require('path');
+const processes      = require('./services/processes');
+const promises       = require('./services/promises');
+const pythonLanguage = require('./languages/python');
+const uuid           = require('uuid');
 
 
 /**
@@ -46,7 +46,7 @@ function createObjectEmitter(stream) {
  * @param {object} data
  */
 function handleProcessStreamEvent(client, source, data) {
-  log('info', 'client event', source, data);
+  // log('info', 'client event', source, data);
 
   client.emit('event', source, data);
 }
@@ -78,8 +78,8 @@ function listenToChild(client, child) {
  * @returns {Promise}
  */
 function write(childProcess, obj) {
-  return new bluebird(function (resolve, reject) {
-    let result = childProcess.stdin.write(JSON.stringify(obj) + '\n', function (error) {
+  return new bluebird(function(resolve, reject) {
+    let result = childProcess.stdin.write(JSON.stringify(obj) + '\n', function(error) {
       if (!result) {
         reject(new Error('Unable to write to stdin'));
       } else if (error) {
@@ -120,7 +120,7 @@ function request(client, invocation, options) {
     .finally(function() {
       const endTime = (new Date().getTime() - startTime) + 'ms';
 
-      log('info', 'request', invocation, endTime);
+      // log('info', 'request', invocation, endTime);
 
       // clean up reference, no matter what the result
       delete requestMap[id];
@@ -204,11 +204,12 @@ class JupyterClient extends EventEmitter {
   }
 
   getDocStrings(names) {
-    const code = '__get_docstrings(globals(), ' + JSON.stringify(names) + ', False)',
-          args = {
-            allowStdin:  false,
-            stopOnError: true
-          };
+    console.log()
+    const code = '__get_docstrings(globals(), ' + JSON.stringify(names) + ', False)';
+    const args = {
+      allowStdin:  false,
+      stopOnError: true
+    };
 
     return request(this, {
       method: 'execute',
@@ -318,11 +319,8 @@ class JupyterClient extends EventEmitter {
  * @param {object} [options]
  * @returns {object}
  */
-function getPythonCommandOptions(options) {
-  options = resolveHomeDirectory(options);
-
-  log('info', 'get Python Command Options', options);
-  console.log('info', 'CONSOLE LOG Python Command Options', options);
+function _getPythonCommandOptions(options) {
+  options = _resolveHomeDirectory(options);
 
   return _.assign({
     env:      pythonLanguage.setDefaultEnvVars(process.env),
@@ -338,13 +336,27 @@ function getPythonCommandOptions(options) {
  * @param {string} [options.cmd="python"]
  * @returns {ChildProcess}
  */
-function createPythonScriptProcess(targetFile, options) {
+function _createPythonScriptProcess(targetFile, options) {
   options = _.pick(options || {}, ['shell', 'cmd']);
 
-  const processOptions = getPythonCommandOptions(options),
+  const processOptions = _getPythonCommandOptions(options),
         cmd            = options.cmd || 'python';
 
   return processes.create(cmd, [targetFile], processOptions);
+}
+
+/**
+ * @param {object} options
+ * @returns {object}  Modified options
+ */
+function _resolveHomeDirectory(options) {
+  if (options && options.cmd && (_.startsWith(options.cmd, '~') || _.startsWith(options.cmd, '%HOME%'))) {
+    const home = require('os').homedir();
+
+    options.cmd = options.cmd.replace(/^~/, home).replace(/^%HOME%/, home);
+  }
+
+  return options;
 }
 
 /**
@@ -355,7 +367,7 @@ function create(options) {
   const targetFile = path.resolve('./bin/start_kernel.py');
 
   return bluebird.try(function() {
-    const child  = createPythonScriptProcess(targetFile, options),
+    const child  = _createPythonScriptProcess(targetFile, options),
           client = new JupyterClient(child);
 
     return promises.eventsToPromise(client, { resolve: 'ready', reject: 'error' })
@@ -370,7 +382,7 @@ function create(options) {
  * @returns {Promise}
  */
 function getPythonScriptResults(targetFile, options) {
-  const processOptions = getPythonCommandOptions(options),
+  const processOptions = _getPythonCommandOptions(options),
         cmd            = options.cmd || 'python';
 
   return processes.exec(cmd, [targetFile], processOptions);
@@ -389,20 +401,6 @@ function checkPython(options) {
                   return _.assign({}, pythonOptions, options);
                 })
                 .timeout(10000, 'Unable to check python in under 10 seconds: ' + JSON.stringify(options));
-}
-
-/**
- * @param {object} options
- * @returns {object}  Modified options
- */
-function resolveHomeDirectory(options) {
-  if (options && options.cmd && (_.startsWith(options.cmd, '~') || _.startsWith(options.cmd, '%HOME%'))) {
-    const home = require('os').homedir();
-
-    options.cmd = options.cmd.replace(/^~/, home).replace(/^%HOME%/, home);
-  }
-
-  return options;
 }
 
 module.exports.create                 = create;

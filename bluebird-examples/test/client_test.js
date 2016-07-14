@@ -27,18 +27,16 @@ describe("Jupyter Client", function() {
   });
 
   describe('create', function() {
-    /*
-     it('creates', function() {
-     this.timeout(10000);
-     return jupyterClient.create()
-     .then(function (client) {
-     expect(processes.getChildren().length).to.equal(1);
-     return client.kill();
-     }).then(function() {
-     expect(processes.getChildren().length).to.equal(0);
-     });
-     });
-     */
+    it('creates', function() {
+      this.timeout(10000);
+      return jupyterClient.create()
+                          .then(function(client) {
+                            expect(processes.getChildren().length).to.equal(1);
+                            return client.kill();
+                          }).then(function() {
+          expect(processes.getChildren().length).to.equal(0);
+        });
+    });
   });
 
   describe('checkPython', function() {
@@ -62,11 +60,12 @@ describe("Jupyter Client", function() {
   describe('JupyterClient', function() {
     let client;
 
-    before(function() {
+    before(function(done) {
       this.timeout(10000);
       return jupyterClient.create()
                           .then(function(newClient) {
                             client = newClient;
+                            done()
                           });
     });
 
@@ -99,13 +98,15 @@ describe("Jupyter Client", function() {
         fn = client[title].bind(client);
       });
 
-      it('gets docstrings when empty list', function() {
+      it('gets docstrings when empty list', function(done) {
         this.timeout(10000);
         return fn([]).then(function(result) {
           expect(result).to.deep.equal({
             name: 'stdout',
             text: '[]\n'
           });
+
+          done();
         });
       });
 

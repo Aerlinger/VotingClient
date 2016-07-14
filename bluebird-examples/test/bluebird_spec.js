@@ -23,7 +23,7 @@ describe("Bluebird promises", () => {
       setTimeout(function() {
         console.log("resolve('bar', 'foo')");
         resolve('bar', 'foo');
-      }, 1000);
+      }, 10);
     });
 
     asyncAction
@@ -44,7 +44,7 @@ describe("Bluebird promises", () => {
 
   it("can pass a resolver as a function object", (done) => {
     let p = new Promise(function(resolve, reject) {
-      setTimeout(resolve, 1000);
+      setTimeout(resolve, 10);
     });
 
     p.then((message) => {
@@ -56,27 +56,27 @@ describe("Bluebird promises", () => {
   it("can run multiple promises concurrently", (done) => {
     let i = 0
 
-    timedPrint("Third!", 1500).then((msg) => {
+    timedPrint("Third!", 300).then((msg) => {
       i++;
 
       expect(i).to.equal(3)
-      console.log(msg, "complete!");
+      // console.log(msg, "complete!");
 
       done()
     });
 
-    timedPrint("Second!", 1000).then((msg) => {
+    timedPrint("Second!", 200).then((msg) => {
       i++;
 
       expect(i).to.equal(2)
-      console.log(msg, "complete!");
+      // console.log(msg, "complete!");
     });
 
-    timedPrint("First!", 500).then((msg) => {
+    timedPrint("First!", 100).then((msg) => {
       i++;
 
       expect(i).to.equal(1)
-      console.log(msg, "complete!");
+      // console.log(msg, "complete!");
     });
   });
 
@@ -84,12 +84,12 @@ describe("Bluebird promises", () => {
     Promise
       .race(
         [
-          timedPrint("Third!", 1500),
-          timedPrint("Second!", 1000),
-          timedPrint("First!", 500)
+          timedPrint("Third!", 300),
+          timedPrint("Second!", 200),
+          timedPrint("First!", 100)
         ])
       .then(function(result) {
-        console.log("First to finish: ", result)
+        // console.log("First to finish: ", result)
 
         expect(result).to.eq('First!')
         done()
@@ -100,12 +100,12 @@ describe("Bluebird promises", () => {
     Promise
       .all(
         [
-          timedPrint("Third!", 1500),
-          timedPrint("Second!", 1000),
-          timedPrint("First!", 500)
+          timedPrint("Third!", 300),
+          timedPrint("Second!", 200),
+          timedPrint("First!", 100)
         ])
       .then(function(results) {
-        console.log("All complete: ", results)
+        // console.log("All complete: ", results)
         expect(results).to.eql(['Third!', 'Second!', 'First!']);
         done()
       });

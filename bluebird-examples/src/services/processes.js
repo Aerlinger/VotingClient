@@ -1,10 +1,10 @@
 'use strict';
 
-const _ = require('lodash'),
-      bluebird = require('bluebird'),
-      childProcess = require('child_process'),
-      log = console.log,
-      children = [];
+const _            = require('lodash');
+const bluebird     = require('bluebird');
+const childProcess = require('child_process');
+const log          = require('../util/log').asInternal(__filename);
+const children     = [];
 
 /**
  * @param {ChildProcess} child
@@ -17,7 +17,7 @@ function _addChild(child) {
 /**
  * @param {ChildProcess} child
  */
-function removeChild(child) {
+function _removeChild(child) {
   _.pull(children, child);
   log('debug', 'removed child process', child.pid, ';', children.length, 'children running');
 }
@@ -37,7 +37,7 @@ function getChildren() {
  */
 function create(str, args, options) {
   const child = childProcess.spawn(str, args || options, args && options)
-                            .on('close', () => removeChild(child));
+                            .on('close', () => _removeChild(child));
 
   _addChild(child);
   return child;
@@ -50,16 +50,17 @@ function create(str, args, options) {
  * @returns {Promise}
  */
 function exec(str, args, options) {
-  return new bluebird(function (resolve, reject) {
+  return new bluebird(function(resolve, reject) {
     const child = create(str, args, options);
-    let stdout = [],
-          stderr = [],
-          errors = [];
+    let stdout  = [];
+    let stderr  = [];
+    let errors  = [];
 
     child.stdout.on('data', data => stdout.push(data));
     child.stderr.on('data', data => stderr.push(data));
+
     child.on('error', data => errors.push(data));
-    child.on('close', function () {
+    child.on('close', function() {
       if (errors.length) {
         reject(_.first(errors));
       } else if (stderr.length) {
@@ -76,15 +77,16 @@ function exec(str, args, options) {
  * @returns {Promise}
  */
 function kill(childProcess) {
-  return new bluebird(function (resolve) {
-    childProcess.on('close', function (code, signal) {
-      resolve({code, signal});
+  return new bluebird(function(resolve) {
+    childProcess.on('close', function(code, signal) {
+      resolve({ code, signal });
     });
+    
     childProcess.kill();
   }).timeout(5000, 'failed to kill child process ' + childProcess.pid);
 }
 
 module.exports.getChildren = getChildren;
-module.exports.create = create;
-module.exports.exec = exec;
-module.exports.kill = kill;
+module.exports.create      = create;
+module.exports.exec        = exec;
+module.exports.kill        = kill;
