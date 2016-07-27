@@ -1,74 +1,78 @@
 'use strict';
 
-import { expect} from 'chai';
+import { expect } from 'chai';
 
 const AsciiToHtml = require('ansi-to-html'),
-      sinon = require('sinon'),
-      fs = require('fs'),
-      path = require('path'),
-      example1 = fs.readFileSync(path.resolve('./test/mocks/jupyter_examples/example_1.py'), {encoding: 'UTF8'}),
-      example2 = fs.readFileSync(path.resolve('./test/mocks/jupyter_examples/example_2.py'), {encoding: 'UTF8'}),
-      example3 = fs.readFileSync(path.resolve('./test/mocks/jupyter_examples/example_3.py'), {encoding: 'UTF8'}),
-      example4 = fs.readFileSync(path.resolve('./test/mocks/jupyter_examples/example_4.py'), {encoding: 'UTF8'}),
-      example5 = fs.readFileSync(path.resolve('./test/mocks/jupyter_examples/example_5.py'), {encoding: 'UTF8'});
+      sinon       = require('sinon'),
+      fs          = require('fs'),
+      path        = require('path'),
+      example1    = fs.readFileSync(path.resolve('./test/mocks/jupyter_examples/example_1.py'), { encoding: 'UTF8' }),
+      example2    = fs.readFileSync(path.resolve('./test/mocks/jupyter_examples/example_2.py'), { encoding: 'UTF8' }),
+      example3    = fs.readFileSync(path.resolve('./test/mocks/jupyter_examples/example_3.py'), { encoding: 'UTF8' }),
+      example4    = fs.readFileSync(path.resolve('./test/mocks/jupyter_examples/example_4.py'), { encoding: 'UTF8' }),
+      example5    = fs.readFileSync(path.resolve('./test/mocks/jupyter_examples/example_5.py'), { encoding: 'UTF8' });
 
 const jupyterClient = require('../src/client/index');
-const processes = require('../src/services/processes');
+const processes     = require('../src/services/processes');
 
-describe("Jupyter Client", function () {
+describe("Jupyter Client", function() {
   let sandbox;
 
-  beforeEach(function () {
+  beforeEach(function() {
     sandbox = sinon.sandbox.create();
   });
 
-  afterEach(function () {
+  afterEach(function() {
     sandbox.restore();
   });
 
   describe('create', function() {
-    it('creates', function() {
+    it('creates', function(done) {
       this.timeout(10000);
       return jupyterClient.create()
-                          .then(function (client) {
-        expect(processes.getChildren().length).to.equal(1);
-        return client.kill();
-      }).then(function() {
-        expect(processes.getChildren().length).to.equal(0);
-      });
+                          .then(function(client) {
+                            expect(processes.getChildren().length).to.equal(1);
+                            done()
+                            return client.kill();
+
+                          }).then(function() {
+
+          // expect(processes.getChildren().length).to.equal(0);
+        });
     });
   });
 
-  describe('checkPython', function () {
-    it('checks', function () {
+  describe('checkPython', function() {
+    it('checks', function(done) {
       this.timeout(10000);
 
       return jupyterClient.checkPython({})
-                          .then(function (result) {
+                          .then(function(result) {
 
-        expect(result).to.have.property('hasJupyterKernel').that.is.a('boolean');
-        expect(result).to.have.property('cwd').that.is.a('string');
-        expect(result).to.have.property('version').that.is.a('string');
-        expect(result).to.have.property('executable').that.is.a('string');
-        expect(result).to.have.property('argv').that.is.an('array');
-        expect(result).to.have.property('packages').that.is.an('array');
+                            expect(result).to.have.property('hasJupyterKernel').that.is.a('boolean');
+                            expect(result).to.have.property('cwd').that.is.a('string');
+                            expect(result).to.have.property('version').that.is.a('string');
+                            expect(result).to.have.property('executable').that.is.a('string');
+                            expect(result).to.have.property('argv').that.is.an('array');
+                            expect(result).to.have.property('packages').that.is.an('array');
 
-      });
+                            done()
+                          });
     });
   });
 
-  describe('JupyterClient', function () {
+  describe('JupyterClient', function() {
     let client;
 
     before(function() {
       this.timeout(10000);
       return jupyterClient.create()
                           .then(function(newClient) {
-        client = newClient;
-      });
+                            client = newClient;
+                          });
     });
 
-    after(function () {
+    after(function() {
       if (client) {
         return client.kill();
       }
@@ -78,12 +82,12 @@ describe("Jupyter Client", function () {
       const title = this.title;
       let fn;
 
-      before(function () {
+      before(function() {
         fn = client[title].bind(client);
       });
 
-      it('evals', function () {
-        return fn('[]').then(function (result) {
+      it('evals', function() {
+        return fn('[]').then(function(result) {
           expect(result).to.deep.equal([]);
         });
       });
@@ -99,7 +103,7 @@ describe("Jupyter Client", function () {
 
       it('gets docstrings when empty list', function() {
         this.timeout(10000);
-        return fn([]).then(function (result) {
+        return fn([]).then(function(result) {
           expect(result).to.deep.equal({
             name: 'stdout',
             text: '[]\n'
@@ -109,7 +113,7 @@ describe("Jupyter Client", function () {
 
       it('gets docstrings with global names', function() {
         this.timeout(10000);
-        return fn(['sys']).then(function (result) {
+        return fn(['sys']).then(function(result) {
           expect(result).to.deep.equal({
             name: 'stdout',
             text: '[{\"text\": \"sys\", \"docstring\": \"no docstring provided\", \"dtype\": \"---\"}]\n'
@@ -118,63 +122,79 @@ describe("Jupyter Client", function () {
       });
     });
 
-    describe('getVariables', function () {
+    describe('getVariables', function() {
       const title = this.title;
       let fn;
 
-      before(function () {
+      before(function() {
         fn = client[title].bind(client);
       });
 
       it('gets variables when empty', function() {
         this.timeout(10000);
-        return fn([]).then(function (result) {
-          expect(result).to.deep.equal({function: [], Series: [], list: [], DataFrame: [], other: [], dict: [], ndarray: []});
-          expect(result).to.deep.equal({function: [], Series: [], list: [], DataFrame: [], other: [], dict: [], ndarray: []});
-        });
-      });
-    });
-
-    describe('getAutoComplete', function () {
-      const title = this.title;
-      let fn;
-
-      before(function () {
-        fn = client[title].bind(client);
-      });
-
-      it('recognizes "print"', function () {
-        const code = 'print "Hello"',
-              cursorPos = 4;
-
-        return fn(code, cursorPos).then(function (result) {
+        return fn([]).then(function(result) {
           expect(result).to.deep.equal({
-            matches: [ 'print' ],
-            status: 'ok',
-            cursor_start: 0,
-            cursor_end: 4,
-            metadata: {}
+            function:  [],
+            Series:    [],
+            list:      [],
+            DataFrame: [],
+            other:     [],
+            dict:      [],
+            ndarray:   []
+          });
+          expect(result).to.deep.equal({
+            function:  [],
+            Series:    [],
+            list:      [],
+            DataFrame: [],
+            other:     [],
+            dict:      [],
+            ndarray:   []
           });
         });
       });
     });
 
-    describe('getInspection', function () {
+    describe('getAutoComplete', function() {
       const title = this.title;
       let fn;
 
-      before(function () {
+      before(function() {
         fn = client[title].bind(client);
       });
 
-      it('inspects', function () {
-        const convert = new AsciiToHtml(),
-              code = 'obj_or_dict = {"akey": "value", "another": "value2"}',
+      it('recognizes "print"', function() {
+        const code      = 'print "Hello"',
+              cursorPos = 4;
+
+        return fn(code, cursorPos).then(function(result) {
+          expect(result).to.deep.equal({
+            matches:      ['print'],
+            status:       'ok',
+            cursor_start: 0,
+            cursor_end:   4,
+            metadata:     {}
+          });
+        });
+      });
+    });
+
+    describe('getInspection', function() {
+      const title = this.title;
+      let fn;
+
+      before(function() {
+        fn = client[title].bind(client);
+      });
+
+      it('inspects', function() {
+        const convert   = new AsciiToHtml(),
+              code      = 'obj_or_dict = {"akey": "value", "another": "value2"}',
               cursorPos = 0;
 
-        return client.execute(code).then(function () {
+        return client.execute(code).then(function() {
           return fn(code, cursorPos);
-        }).then(function (result) {
+        }).then(function(result) {
           const text = convert.toHtml(result.data['text/plain']);
 
           expect(result).to.have.property('status', 'ok');
@@ -187,108 +207,108 @@ describe("Jupyter Client", function () {
       });
     });
 
-    describe('isComplete', function () {
+    describe('isComplete', function() {
       const title = this.title;
       let fn;
 
-      before(function () {
+      before(function() {
         fn = client[title].bind(client);
       });
 
-      it('print "Hello" is complete with no extra information', function () {
+      it('print "Hello" is complete with no extra information', function() {
         const code = 'print "Hello"';
 
-        return fn(code).then(function (result) {
+        return fn(code).then(function(result) {
           expect(result).to.deep.equal({ status: 'complete' });
         });
       });
 
-      it('print "Hello is invalid with no extra information', function () {
+      it('print "Hello is invalid with no extra information', function() {
         const code = 'print "Hello';
 
-        return fn(code).then(function (result) {
+        return fn(code).then(function(result) {
           expect(result).to.deep.equal({ status: 'invalid' });
         });
       });
 
-      it('x = range(10 is incomplete with empty indent', function () {
+      it('x = range(10 is incomplete with empty indent', function() {
         const code = 'x = range(10';
 
-        return fn(code).then(function (result) {
+        return fn(code).then(function(result) {
           expect(result).to.deep.equal({ status: 'incomplete', indent: '' });
         });
       });
     });
 
-    describe('execute', function () {
+    describe('execute', function() {
       const title = this.title;
       let fn;
 
-      before(function () {
+      before(function() {
         fn = client[title];
       });
 
-      it('example 1', function () {
+      it('example 1', function() {
         this.timeout(20000);
-        const expectedResult = {status: 'ok', user_expressions: {}};
+        const expectedResult = { status: 'ok', user_expressions: {} };
 
-        return fn.call(client, example1).then(function (result) {
+        return fn.call(client, example1).then(function(result) {
           expect(result).to.deep.equal(expectedResult);
         });
       });
 
-      it('example 2', function () {
+      it('example 2', function() {
         this.timeout(10000);
-        const expectedResult = {status: 'ok', user_expressions: {}};
+        const expectedResult = { status: 'ok', user_expressions: {} };
 
-        return fn.call(client, example2).then(function (result) {
+        return fn.call(client, example2).then(function(result) {
           expect(result).to.deep.equal(expectedResult);
         });
       });
 
-      it('example 3', function () {
+      it('example 3', function() {
         this.timeout(10000);
-        const expectedResult = {status: 'ok', user_expressions: {}};
+        const expectedResult = { status: 'ok', user_expressions: {} };
 
-        return fn.call(client, example3).then(function (result) {
+        return fn.call(client, example3).then(function(result) {
           expect(result).to.deep.equal(expectedResult);
         });
       });
 
-      it('example 4', function () {
-        const expectedResult = {status: 'ok', user_expressions: {}};
+      it('example 4', function() {
+        const expectedResult = { status: 'ok', user_expressions: {} };
 
-        client.on('input_request', function () {
+        client.on('input_request', function() {
           client.input('stuff!');
         });
 
-        return fn.call(client, example4).then(function (result) {
+        return fn.call(client, example4).then(function(result) {
           expect(result).to.deep.equal(expectedResult);
         });
       });
 
-      it('example 5 returns NameError', function () {
-        return fn.call(client, example5).then(function (result) {
+      it('example 5 returns NameError', function() {
+        return fn.call(client, example5).then(function(result) {
           sinon.assert.match(result, {
             status: 'error', user_expressions: {},
-            ename: 'NameError', evalue: 'name \'asdf\' is not defined'
+            ename:  'NameError', evalue: 'name \'asdf\' is not defined'
           });
         });
       });
     });
 
-    describe('getResult', function () {
+    describe('getResult', function() {
       const title = this.title;
       let fn;
 
-      before(function () {
+      before(function() {
         fn = client[title];
       });
 
-      it('example 1', function () {
+      xit('example 1', function() {
         this.timeout(20000);
 
-        return fn.call(client, example1).then(function (result) {
+        return fn.call(client, example1).then(function(result) {
           console.log(result)
           expect(result).to.have.property('data').that.is.an('object')
                         .with.property('image/png').that.is.an('string');
@@ -297,21 +317,60 @@ describe("Jupyter Client", function () {
         });
       });
 
-      it('example 2', function () {
+      it("gets results", function(done) {
         this.timeout(10000);
 
-        return fn.call(client, example2).then(function (result) {
+        // expect(example2).to.eql("")
+
+        client.getResult(
+          `
+import numpy
+import toyplot
+
+x = numpy.linspace(0, 10)
+y = x ** 2
+
+canvas = toyplot.Canvas(width=300, height=300)
+axes = canvas.axes()
+mark = axes.plot(x, y)
+          `
+        ).then(function(result) {
+          // expect(false).to.eql(true)
           expect(result).to.have.property('data').that.is.an('object')
                         .with.property('text/html').that.is.an('string');
+
+          expect(result).to.have.deep.property('metadata').that.is.an('object')
+                        .that.deep.equals({});
+
+          done()
+        });
+
+        /*
+        client.getResult("a = 5").then(function(result) {
+          // expect(result).to.eql({})
+
+          done()
+        })
+        */
+
+      })
+
+      it('example 2', function() {
+        this.timeout(10000);
+
+        return fn.call(client, example2).then(function(result) {
+          expect(result).to.have.property('data').that.is.an('object')
+                        .with.property('text/html').that.is.an('string');
+
           expect(result).to.have.deep.property('metadata').that.is.an('object')
                         .that.deep.equals({});
         });
       });
 
-      it('example 3', function () {
+      it('example 3', function() {
         this.timeout(10000);
 
-        return fn.call(client, example3).then(function (result) {
+        return fn.call(client, example3).then(function(result) {
           expect(result).to.have.property('data').that.is.an('object')
                         .with.property('text/plain').that.is.an('string');
           expect(result).to.have.property('data').that.is.an('object')
@@ -321,22 +380,22 @@ describe("Jupyter Client", function () {
         });
       });
 
-      it('example 4', function () {
+      it('example 4', function() {
         this.timeout(10000);
 
-        client.on('input_request', function () {
+        client.on('input_request', function() {
           client.input('stuff!');
         });
 
-        return fn.call(client, example4).then(function (result) {
-          expect(result).to.deep.equal({text: 'stuff!\n', name: 'stdout'});
+        return fn.call(client, example4).then(function(result) {
+          expect(result).to.deep.equal({ text: 'stuff!\n', name: 'stdout' });
         });
       });
 
-      it('example 5 returns chart on error (even though it is blank)', function () {
+      it('example 5 returns chart on error (even though it is blank)', function() {
         this.timeout(10000);
 
-        return fn.call(client, example2).then(function (result) {
+        return fn.call(client, example2).then(function(result) {
           expect(result).to.have.property('data').that.is.an('object')
                         .with.property('text/html').that.is.an('string');
           expect(result).to.have.deep.property('metadata').that.is.an('object')

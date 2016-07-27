@@ -1,11 +1,11 @@
 'use strict';
 
-const _ = require('lodash'),
-  bluebird = require('bluebird'),
-  childProcess = require('child_process'),
-  log = require('./log').asInternal(__filename),
-  children = [];
 
+const _ = require('lodash'),
+      bluebird = require('bluebird'),
+      childProcess = require('child_process'),
+      log = require('./log').asInternal(__filename),
+      children = [];
 /**
  * @param {ChildProcess} child
  */

@@ -5,9 +5,9 @@ const sinon        = require('sinon');
 const EventEmitter = require('events');
 const log              = require('../src/services/log')
 
-const dirname        = __dirname.split('/').pop();
-const filename = __filename.split('/').pop().split('.').shift();
-const lib      = require('./' + filename);
+const dirname = '../src/services/';
+const filename = 'promises';
+const lib = require(dirname + filename);
 
 describe(dirname + '/' + filename, function() {
   let sandbox;

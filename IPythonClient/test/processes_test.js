@@ -6,9 +6,9 @@ const childProcess     = require('child_process');
 const MockChildProcess = require('./mocks/classes/child-process');
 const log              = require('../src/services/log')
 
-const dirname  = __dirname.split('/').pop();
-const filename = __filename.split('/').pop().split('.').shift();
-const lib      = require('./' + filename);
+const dirname = '../src/services/';
+const filename = 'processes';
+const lib = require(dirname + filename);
 
 describe(dirname + '/' + filename, function() {
   let sandbox;

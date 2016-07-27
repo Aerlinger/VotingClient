@@ -5,6 +5,7 @@ const sinon = require('sinon');
 const dirname = '../src/kernels/python/';
 const filename = 'language';
 const lib = require(dirname + filename);
+
 import { expect} from 'chai';
 
 describe(dirname + '/' + filename, function () {

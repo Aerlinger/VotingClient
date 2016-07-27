@@ -130,6 +130,7 @@ def kernel(wd=None, verbose=0):
             pass
 
         current_timeout = min(current_timeout * 1.1, current_timeout_max)
+        sys.stdout.flush()
 
 if __name__=="__main__":
     wd = None
