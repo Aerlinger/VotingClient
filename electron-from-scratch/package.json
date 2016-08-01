@@ -2,9 +2,11 @@
   "name": "electron-from-scratch",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./src/bootstrap.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "./node_modules/.bin/webpack-dev-server",
+    "hot-server": "node -r babel-register ./server.js",
+    "start-hot": "cross-env HOT=1 NODE_ENV=development electron -r babel-register -r babel-polyfill ./src/bootstrap.js"
   },
   "keywords": [],
   "author": "",

@@ -1,0 +1,11 @@
+{
+  "name": "BozonApp",
+  "version": "0.1.0",
+  "description": "BozonApp application built with Electron",
+  "author": "Anthony Erlinger",
+  "license": "MIT",
+  "main": "javascripts/main/index.js",
+  "dependencies": {
+
+  }
+}

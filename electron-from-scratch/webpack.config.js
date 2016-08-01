@@ -18,7 +18,7 @@ export default {
     main: [
       'react-hot-loader/patch',
       'babel-polyfill',
-      './src/browser/jsx/entry/main',
+      './src/boostrap.js',
       'webpack/hot/only-dev-server',
       'webpack-hot-middleware/client?path=http://localhost:8889/__webpack_hmr'
     ]
